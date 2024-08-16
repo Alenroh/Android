@@ -74,5 +74,4 @@
         android:layout_height="wrap_content"
         android:text="Add Excursion"
         android:layout_marginTop="8dp" />
-
 </LinearLayout>
