@@ -1,13 +1,9 @@
 package com.example.something;
 
-import android.app.AlarmManager;
 import android.app.DatePickerDialog;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -109,6 +105,8 @@ public class VacationDetailActivity extends AppCompatActivity {
         findViewById(R.id.button_add_excursion).setOnClickListener(v -> {
             Intent addExcursionIntent = new Intent(VacationDetailActivity.this, ExcursionDetailActivity.class);
             addExcursionIntent.putExtra("vacation_id", vacationId);
+            addExcursionIntent.putExtra("vacation_start_date", currentVacation.getStartDate());
+            addExcursionIntent.putExtra("vacation_end_date", currentVacation.getEndDate());
             startActivity(addExcursionIntent);
         });
     }
