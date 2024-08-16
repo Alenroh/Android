@@ -25,19 +25,4 @@ public interface VacationDao {
 
     @Query("SELECT * FROM vacations")
     LiveData<List<Vacation>> getAllVacations();
-
-    @Query("SELECT * FROM excursions WHERE vacationId = :vacationId")
-    LiveData<List<Excursion>> getExcursionsForVacation(int vacationId);
-
-    @Query("SELECT * FROM excursions WHERE id = :id")
-    LiveData<Excursion> getExcursionById(int id);
-
-    @Insert
-    void insertExcursion(Excursion excursion);
-
-    @Update
-    void updateExcursion(Excursion excursion);
-
-    @Delete
-    void deleteExcursion(Excursion excursion);
 }

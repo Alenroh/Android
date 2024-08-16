@@ -16,13 +16,19 @@ public class Excursion {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private int vacationId;
-    private String description;
+    private String title;
+    private String date;
 
     // Getters and Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
+
     public int getVacationId() { return vacationId; }
     public void setVacationId(int vacationId) { this.vacationId = vacationId; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
 }

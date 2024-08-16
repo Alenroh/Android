@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -166,9 +165,6 @@ public class VacationDetailActivity extends AppCompatActivity {
             vacationViewModel.update(currentVacation);
         }
 
-        setNotification(title, startDate, true);
-        setNotification(title, endDate, false);
-
         finish();
     }
 
@@ -190,25 +186,5 @@ public class VacationDetailActivity extends AppCompatActivity {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    // Set notifications for the vacation start and end dates
-    private void setNotification(String title, String date, boolean isStart) {
-        Intent intent = new Intent(this, VacationNotificationReceiver.class);
-        intent.putExtra("vacation_title", title);
-        intent.putExtra("message", isStart ? "Vacation starting: " + title : "Vacation ending: " + title);
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, isStart ? 1 : 2, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Calendar calendar = Calendar.getInstance();
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-            calendar.setTime(sdf.parse(date));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
     }
 }

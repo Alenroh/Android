@@ -56,3 +56,4 @@ public class VacationViewModel extends AndroidViewModel {
         repository.deleteExcursion(excursion);
     }
 }
+

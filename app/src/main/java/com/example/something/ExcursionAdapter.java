@@ -24,7 +24,8 @@ public class ExcursionAdapter extends RecyclerView.Adapter<ExcursionAdapter.Excu
     @Override
     public void onBindViewHolder(@NonNull ExcursionHolder holder, int position) {
         Excursion currentExcursion = excursions.get(position);
-        holder.textViewDescription.setText(currentExcursion.getDescription());
+        holder.textViewTitle.setText(currentExcursion.getTitle());
+        holder.textViewDate.setText(currentExcursion.getDate());
     }
 
     @Override
@@ -38,11 +39,13 @@ public class ExcursionAdapter extends RecyclerView.Adapter<ExcursionAdapter.Excu
     }
 
     class ExcursionHolder extends RecyclerView.ViewHolder {
-        private TextView textViewDescription;
+        private TextView textViewTitle;
+        private TextView textViewDate;
 
         public ExcursionHolder(View itemView) {
             super(itemView);
-            textViewDescription = itemView.findViewById(R.id.text_view_description);
+            textViewTitle = itemView.findViewById(R.id.text_view_title);
+            textViewDate = itemView.findViewById(R.id.text_view_date);
         }
     }
 }
