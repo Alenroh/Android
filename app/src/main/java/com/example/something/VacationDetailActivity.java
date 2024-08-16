@@ -9,8 +9,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -26,6 +24,7 @@ public class VacationDetailActivity extends AppCompatActivity {
     private Calendar startDateCalendar;
     private Calendar endDateCalendar;
     private Vacation currentVacation;
+    private int vacationId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,19 +61,12 @@ public class VacationDetailActivity extends AppCompatActivity {
             datePicker.show();
         });
 
-        // RecyclerView for excursions
-        RecyclerView recyclerView = findViewById(R.id.recycler_view_excursions);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setHasFixedSize(true);
-        ExcursionAdapter adapter = new ExcursionAdapter();
-        recyclerView.setAdapter(adapter);
-
         // ViewModel setup
         vacationViewModel = new ViewModelProvider(this).get(VacationViewModel.class);
 
         // Retrieve vacation data (if editing an existing vacation)
         Intent intent = getIntent();
-        int vacationId = intent.getIntExtra("vacation_id", -1);
+        vacationId = intent.getIntExtra("vacation_id", -1);
         if (vacationId != -1) {
             vacationViewModel.getVacationById(vacationId).observe(this, vacation -> {
                 if (vacation != null) {
@@ -83,9 +75,9 @@ public class VacationDetailActivity extends AppCompatActivity {
                     hotelEditText.setText(vacation.getHotel());
                     startDateEditText.setText(vacation.getStartDate());
                     endDateEditText.setText(vacation.getEndDate());
-
-                    // Load excursions
-                    vacationViewModel.getExcursionsForVacation(vacationId).observe(this, adapter::setExcursions);
+                } else {
+                    Toast.makeText(this, "Vacation not found.", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
             });
         }
@@ -103,11 +95,13 @@ public class VacationDetailActivity extends AppCompatActivity {
 
         // Add Excursion button
         findViewById(R.id.button_add_excursion).setOnClickListener(v -> {
-            Intent addExcursionIntent = new Intent(VacationDetailActivity.this, ExcursionDetailActivity.class);
-            addExcursionIntent.putExtra("vacation_id", vacationId);
-            addExcursionIntent.putExtra("vacation_start_date", currentVacation.getStartDate());
-            addExcursionIntent.putExtra("vacation_end_date", currentVacation.getEndDate());
-            startActivity(addExcursionIntent);
+            if (currentVacation != null) {
+                Intent addExcursionIntent = new Intent(VacationDetailActivity.this, ExcursionDetailActivity.class);
+                addExcursionIntent.putExtra("vacation_id", vacationId);
+                addExcursionIntent.putExtra("vacation_start_date", currentVacation.getStartDate());
+                addExcursionIntent.putExtra("vacation_end_date", currentVacation.getEndDate());
+                startActivity(addExcursionIntent);
+            }
         });
     }
 
@@ -157,9 +151,10 @@ public class VacationDetailActivity extends AppCompatActivity {
         currentVacation.setStartDate(startDate);
         currentVacation.setEndDate(endDate);
 
-        if (currentVacation.getId() == 0) {
+        if (vacationId == -1) {
             vacationViewModel.insert(currentVacation);
         } else {
+            currentVacation.setId(vacationId);  // Ensure the ID is set correctly
             vacationViewModel.update(currentVacation);
         }
 

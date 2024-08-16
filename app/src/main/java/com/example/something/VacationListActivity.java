@@ -2,13 +2,11 @@ package com.example.something;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.List;
 
 public class VacationListActivity extends AppCompatActivity {
 
@@ -19,27 +17,30 @@ public class VacationListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vacation_list);
 
+        // Setup RecyclerView
         RecyclerView recyclerView = findViewById(R.id.recycler_view_vacations);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
 
-        final VacationAdapter adapter = new VacationAdapter();
+        // Setup adapter
+        VacationAdapter adapter = new VacationAdapter();
         recyclerView.setAdapter(adapter);
 
+        // ViewModel setup
         vacationViewModel = new ViewModelProvider(this).get(VacationViewModel.class);
-        vacationViewModel.getAllVacations().observe(this, new Observer<List<Vacation>>() {
-            @Override
-            public void onChanged(List<Vacation> vacations) {
-                adapter.setVacations(vacations);
-            }
+        vacationViewModel.getAllVacations().observe(this, adapter::setVacations);
+
+        // Handle item clicks for editing a vacation
+        adapter.setOnItemClickListener(vacation -> {
+            Intent intent = new Intent(VacationListActivity.this, VacationDetailActivity.class);
+            intent.putExtra("vacation_id", vacation.getId());
+            startActivity(intent);
         });
 
-        findViewById(R.id.button_add_vacation).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(VacationListActivity.this, VacationDetailActivity.class);
-                startActivity(intent);
-            }
+        // Handle "Add Vacation" button click
+        findViewById(R.id.button_add_vacation).setOnClickListener(v -> {
+            Intent intent = new Intent(VacationListActivity.this, VacationDetailActivity.class);
+            startActivity(intent);
         });
     }
 }

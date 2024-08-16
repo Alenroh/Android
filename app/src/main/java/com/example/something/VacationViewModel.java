@@ -7,8 +7,8 @@ import java.util.List;
 
 public class VacationViewModel extends AndroidViewModel {
 
-    private VacationRepository repository;
-    private LiveData<List<Vacation>> allVacations;
+    private final VacationRepository repository;
+    private final LiveData<List<Vacation>> allVacations;
 
     public VacationViewModel(Application application) {
         super(application);
@@ -25,15 +25,21 @@ public class VacationViewModel extends AndroidViewModel {
     }
 
     public void insert(Vacation vacation) {
-        repository.insert(vacation);
+        if (vacation != null) {
+            repository.insert(vacation);
+        }
     }
 
     public void update(Vacation vacation) {
-        repository.update(vacation);
+        if (vacation != null && vacation.getId() > 0) {
+            repository.update(vacation);
+        }
     }
 
     public void delete(Vacation vacation) {
-        repository.delete(vacation);
+        if (vacation != null && vacation.getId() > 0) {
+            repository.delete(vacation);
+        }
     }
 
     public LiveData<List<Excursion>> getExcursionsForVacation(int vacationId) {
@@ -45,15 +51,20 @@ public class VacationViewModel extends AndroidViewModel {
     }
 
     public void insertExcursion(Excursion excursion) {
-        repository.insertExcursion(excursion);
+        if (excursion != null) {
+            repository.insertExcursion(excursion);
+        }
     }
 
     public void updateExcursion(Excursion excursion) {
-        repository.updateExcursion(excursion);
+        if (excursion != null && excursion.getId() > 0) {
+            repository.updateExcursion(excursion);
+        }
     }
 
     public void deleteExcursion(Excursion excursion) {
-        repository.deleteExcursion(excursion);
+        if (excursion != null && excursion.getId() > 0) {
+            repository.deleteExcursion(excursion);
+        }
     }
 }
-

@@ -1,5 +1,6 @@
 package com.example.something;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -43,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Handle Add Vacation button click
         findViewById(R.id.addVacationButton).setOnClickListener(v -> {
-            // Logic to add a new vacation, e.g., launch a new Activity or Dialog
+            Intent intent = new Intent(MainActivity.this, VacationDetailActivity.class);
+            startActivity(intent);
         });
     }
 }
