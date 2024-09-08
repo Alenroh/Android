@@ -41,6 +41,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.6.1")
     implementation("androidx.lifecycle:lifecycle-livedata:2.6.1")
 
+    // RecyclerView
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
+
     // Existing dependencies
     implementation(libs.appcompat)
     implementation(libs.material)

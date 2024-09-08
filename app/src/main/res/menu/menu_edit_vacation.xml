@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/saveVacation"
+        android:title="Save Vacation"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/deleteVacation"
+        android:title="Delete Vacation"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/setAlarm"
+        android:title="Set Alarm"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/copyVacationData"
+        android:title="Copy Vacation Data"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/addExcursion"
+        android:title="Add Excursion"
+        app:showAsAction="never" />
+</menu>

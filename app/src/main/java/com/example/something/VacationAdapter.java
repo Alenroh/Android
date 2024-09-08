@@ -1,86 +1,98 @@
 package com.example.something;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.VacationViewHolder> {
 
-    private List<Vacation> vacations = new ArrayList<>();
-    private OnItemClickListener listener;
+    private final Context context;
+    private List<Vacation> mVacations = new ArrayList<>();
+    private final LayoutInflater mInflater;
+    private final ActivityResultLauncher<Intent> vacationDetailLauncher;
 
-    @NonNull
-    @Override
-    public VacationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.vacation_item, parent, false);
-        return new VacationViewHolder(itemView);
+    // SimpleDateFormat for displaying only dates (no time)
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
+
+    public VacationAdapter(Context context, ActivityResultLauncher<Intent> launcher) {
+        mInflater = LayoutInflater.from(context);
+        this.context = context;
+        this.vacationDetailLauncher = launcher; // Pass the ActivityResultLauncher from the calling activity
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull VacationViewHolder holder, int position) {
-        Vacation currentVacation = vacations.get(position);
-        holder.textViewTitle.setText(currentVacation.getTitle());
-        holder.textViewHotel.setText(currentVacation.getHotel());
-        holder.textViewStartDate.setText(currentVacation.getStartDate());
-        holder.textViewEndDate.setText(currentVacation.getEndDate());
+    class VacationViewHolder extends RecyclerView.ViewHolder {
+        private final TextView vacationTitleView;
+        private final TextView vacationHotelView;
+        private final TextView vacationStartDateView;
+        private final TextView vacationEndDateView;
 
-        // Set up click listener for the Edit button
-        holder.buttonEdit.setOnClickListener(v -> {
-            if (listener != null && position != RecyclerView.NO_POSITION) {
-                listener.onItemClick(currentVacation);
-            }
-        });
-    }
-
-    @Override
-    public int getItemCount() {
-        return vacations != null ? vacations.size() : 0;
-    }
-
-    public void setVacations(List<Vacation> vacations) {
-        this.vacations = vacations;
-        notifyDataSetChanged();
-    }
-
-    public class VacationViewHolder extends RecyclerView.ViewHolder {
-        private TextView textViewTitle;
-        private TextView textViewHotel;
-        private TextView textViewStartDate;
-        private TextView textViewEndDate;
-        private Button buttonEdit;
-
-        public VacationViewHolder(View itemView) {
+        private VacationViewHolder(View itemView) {
             super(itemView);
-            textViewTitle = itemView.findViewById(R.id.text_view_title);
-            textViewHotel = itemView.findViewById(R.id.text_view_hotel);
-            textViewStartDate = itemView.findViewById(R.id.text_view_start_date);
-            textViewEndDate = itemView.findViewById(R.id.text_view_end_date);
-            buttonEdit = itemView.findViewById(R.id.button_edit_vacation);
+            vacationTitleView = itemView.findViewById(R.id.vacationTitle);
+            vacationHotelView = itemView.findViewById(R.id.vacationHotel);
+            vacationStartDateView = itemView.findViewById(R.id.vacationStartDate);
+            vacationEndDateView = itemView.findViewById(R.id.vacationEndDate);
 
-            // Handle itemView click for entire row
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
-                if (listener != null && position != RecyclerView.NO_POSITION) {
-                    listener.onItemClick(vacations.get(position));
+                if (position != RecyclerView.NO_POSITION && mVacations != null && !mVacations.isEmpty()) {
+                    final Vacation currentVacation = mVacations.get(position);
+                    Intent intent = new Intent(context, VacationDetailActivity.class);
+                    intent.putExtra("vacationID", currentVacation.getVacationID());
+                    intent.putExtra("title", currentVacation.getTitle());
+                    intent.putExtra("hotel", currentVacation.getHotel());
+                    intent.putExtra("start_date", sdf.format(currentVacation.getStart_date()));  // Format start_date as a date
+                    intent.putExtra("end_date", sdf.format(currentVacation.getEnd_date()));  // Format end_date as a date
+
+                    // Use the ActivityResultLauncher to launch VacationDetailActivity
+                    vacationDetailLauncher.launch(intent);
                 }
             });
         }
     }
 
-    public interface OnItemClickListener {
-        void onItemClick(Vacation vacation);
+    @NonNull
+    @Override
+    public VacationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView = mInflater.inflate(R.layout.activity_vacation_list_item, parent, false);
+        return new VacationViewHolder(itemView);
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.listener = listener;
+    @Override
+    public void onBindViewHolder(@NonNull VacationViewHolder holder, int position) {
+        if (mVacations != null && !mVacations.isEmpty()) {
+            Vacation currentVacation = mVacations.get(position);
+            holder.vacationTitleView.setText("Title: " + currentVacation.getTitle());
+            holder.vacationHotelView.setText("Hotel: " + currentVacation.getHotel());
+            holder.vacationStartDateView.setText("Start: " + sdf.format(currentVacation.getStart_date()));  // Display only date
+            holder.vacationEndDateView.setText("End: " + sdf.format(currentVacation.getEnd_date()));  // Display only date
+        } else {
+            holder.vacationTitleView.setText("No Vacation Title");
+            holder.vacationHotelView.setText("");
+            holder.vacationStartDateView.setText("");
+            holder.vacationEndDateView.setText("");
+        }
+    }
+
+    public void setVacations(List<Vacation> vacations) {
+        this.mVacations = (vacations != null) ? vacations : new ArrayList<>();
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public int getItemCount() {
+        return (mVacations != null) ? mVacations.size() : 0;
     }
 }

@@ -4,25 +4,31 @@ import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
+
 import java.util.List;
 
 @Dao
 public interface ExcursionDao {
 
-    @Insert
-    void insertExcursion(Excursion excursion);
+    @Query("SELECT * FROM Excursions ORDER BY excursionID ASC")
+    LiveData<List<Excursion>> getAllExcursions();
+
+    @Query("SELECT * FROM Excursions WHERE vacationID=:id ORDER BY excursionID ASC")
+    LiveData<List<Excursion>> getExcursionsByVacation(int id);
+
+    @Query("SELECT * FROM Excursions WHERE excursionID = :id")
+    LiveData<Excursion> findExcursionById(int id);
+
+    // Insert method to return the generated excursion ID
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    long insert(Excursion excursion);  // Returns the inserted excursionID
 
     @Update
-    void updateExcursion(Excursion excursion);
+    void update(Excursion excursion);
 
     @Delete
-    void deleteExcursion(Excursion excursion);
-
-    @Query("SELECT * FROM excursions WHERE id = :id")
-    LiveData<Excursion> getExcursionById(int id);
-
-    @Query("SELECT * FROM excursions WHERE vacationId = :vacationId")
-    LiveData<List<Excursion>> getExcursionsForVacation(int vacationId);
+    void delete(Excursion excursion);
 }

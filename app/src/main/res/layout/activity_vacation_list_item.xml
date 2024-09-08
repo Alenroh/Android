@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- TextView for the Vacation Title -->
+    <TextView
+        android:id="@+id/vacationTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Title: Vacation Title"
+        android:textStyle="normal"
+        android:textSize="18sp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- TextView for the Hotel Name -->
+    <TextView
+        android:id="@+id/vacationHotel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hotel: Hotel Name"
+        android:textSize="16sp"
+        android:layout_marginBottom="4dp" />
+
+    <!-- TextView for the Start Date -->
+    <TextView
+        android:id="@+id/vacationStartDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start Date: MM/DD/YYYY"
+        android:textSize="14sp" />
+
+    <!-- TextView for the End Date -->
+    <TextView
+        android:id="@+id/vacationEndDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="End Date: MM/DD/YYYY"
+        android:textSize="14sp" />
+</LinearLayout>

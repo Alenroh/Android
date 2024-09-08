@@ -2,4 +2,10 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- Define your primary color -->
+    <color name="colorPrimary">#6200EE</color>
+    <!-- Define your primary dark color -->
+    <color name="colorPrimaryDark">#3700B3</color>
+    <!-- Define your accent color -->
+    <color name="colorAccent">#03DAC5</color>
 </resources>

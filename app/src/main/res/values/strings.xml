@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">something</string>
+    <string name="app_name">Vacation Viewer</string>
+    <string name="add_button_text">Add</string>
+    <string name="add_button_description">Add an item</string>
+    <string name="add_excursion">Add Excursion</string>
+    <string name="add_vacation">Add Vacation</string>
+    <string name="enterButtonTxt">Enter</string>
 </resources>

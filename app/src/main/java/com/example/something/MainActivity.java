@@ -2,50 +2,40 @@ package com.example.something;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
 
-    private VacationViewModel vacationViewModel;
+    public static int numAlert;
 
+    // COMMIT MSG
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-
-        // Handling edge-to-edge layout and system bars
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // Setup RecyclerView
-        RecyclerView recyclerView = findViewById(R.id.vacationRecyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setHasFixedSize(true);
 
-        // Adapter setup
-        VacationAdapter adapter = new VacationAdapter();
-        recyclerView.setAdapter(adapter);
 
-        // ViewModel setup
-        vacationViewModel = new ViewModelProvider(this).get(VacationViewModel.class);
-        vacationViewModel.getAllVacations().observe(this, vacations -> {
-            // Update the adapter with the list of vacations
-            adapter.setVacations(vacations);
-        });
-
-        // Handle Add Vacation button click
-        findViewById(R.id.addVacationButton).setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, VacationDetailActivity.class);
-            startActivity(intent);
+        Button enterButton = findViewById(R.id.enterButton);
+        enterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent addIntent = new Intent(MainActivity.this, VacationListActivity.class);
+                startActivity(addIntent);
+            }
         });
     }
 }

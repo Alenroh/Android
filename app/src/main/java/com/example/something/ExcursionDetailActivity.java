@@ -1,169 +1,186 @@
 package com.example.something;
 
-import android.app.AlarmManager;
+import static com.example.something.StringDateFormatUtil.sdf;
+
 import android.app.DatePickerDialog;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.widget.DatePicker;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
+import java.util.Date;
+import java.util.concurrent.Future;
 
 public class ExcursionDetailActivity extends AppCompatActivity {
 
-    private EditText titleEditText;
-    private EditText dateEditText;
-    private Excursion currentExcursion;
-    private VacationViewModel vacationViewModel;
-    private Calendar dateCalendar;
-    private int vacationId;
-    private String vacationStartDate;
-    private String vacationEndDate;
+    final Calendar excursionCalendar = Calendar.getInstance();
+    int excursionID = -1;  // Initialize as -1 to denote new excursions
+    int vacationID;
+    String title;
+    Date excursionDate;
+    EditText editExcursionTitle;
+    Button excursionDateBtn;
+    Repository repository;
+    DatePickerDialog.OnDateSetListener dpdDate;
+
+    TextWatcher txtWatcherTitle = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            title = s.toString();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_excursion_detail);
+        setContentView(R.layout.activity_excursion_details);
 
-        titleEditText = findViewById(R.id.edit_text_title);
-        dateEditText = findViewById(R.id.edit_text_date);
+        // Get data from intent
+        title = getIntent().getStringExtra("title");
+        vacationID = getIntent().getIntExtra("vacationID", -1);
+        excursionID = getIntent().getIntExtra("excursionID", -1);  // Ensure the correct excursionID is retrieved
+        excursionDate = (Date) getIntent().getSerializableExtra("excursion_date");
 
-        dateCalendar = Calendar.getInstance();
+        editExcursionTitle = findViewById(R.id.editExcursionTitle);
+        excursionDateBtn = findViewById(R.id.excursionDateBtn);
+        repository = new Repository(getApplication());
 
-        dateEditText.setOnClickListener(v -> {
-            DatePickerDialog datePicker = new DatePickerDialog(
-                    ExcursionDetailActivity.this, dateSetListener,
-                    dateCalendar.get(Calendar.YEAR),
-                    dateCalendar.get(Calendar.MONTH),
-                    dateCalendar.get(Calendar.DAY_OF_MONTH));
-            datePicker.show();
-        });
-
-        vacationViewModel = new ViewModelProvider(this).get(VacationViewModel.class);
-
-        Intent intent = getIntent();
-        vacationId = intent.getIntExtra("vacation_id", -1);
-        vacationStartDate = intent.getStringExtra("vacation_start_date");
-        vacationEndDate = intent.getStringExtra("vacation_end_date");
-
-        int excursionId = intent.getIntExtra("excursion_id", -1);
-        if (excursionId != -1) {
-            vacationViewModel.getExcursionById(excursionId).observe(this, excursion -> {
-                if (excursion != null) {
-                    currentExcursion = excursion;
-                    titleEditText.setText(excursion.getTitle());
-                    dateEditText.setText(excursion.getDate());
-                }
-            });
+        // Set initial values if editing
+        if (title != null) {
+            editExcursionTitle.setText(title);
         }
 
-        findViewById(R.id.button_save_excursion).setOnClickListener(v -> saveExcursion());
-        findViewById(R.id.button_delete_excursion).setOnClickListener(v -> deleteExcursion());
+        if (excursionDate != null) {
+            excursionCalendar.setTime(excursionDate);
+            excursionDateBtn.setText(sdf.format(excursionDate));
+        }
+
+        editExcursionTitle.addTextChangedListener(txtWatcherTitle);
+
+        // Date picker setup
+        excursionDateBtn.setOnClickListener(v -> {
+            new DatePickerDialog(ExcursionDetailActivity.this,
+                    dpdDate,
+                    excursionCalendar.get(Calendar.YEAR),
+                    excursionCalendar.get(Calendar.MONTH),
+                    excursionCalendar.get(Calendar.DAY_OF_MONTH)).show();
+        });
+
+        dpdDate = (view, year, month, dayOfMonth) -> {
+            excursionCalendar.set(Calendar.YEAR, year);
+            excursionCalendar.set(Calendar.MONTH, month);
+            excursionCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            excursionDate = excursionCalendar.getTime();
+            excursionDateBtn.setText(sdf.format(excursionDate));
+        };
     }
 
-    private final DatePickerDialog.OnDateSetListener dateSetListener = (view, year, monthOfYear, dayOfMonth) -> {
-        dateCalendar.set(Calendar.YEAR, year);
-        dateCalendar.set(Calendar.MONTH, monthOfYear);
-        dateCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        updateDateLabel();
-    };
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_excursion_details, menu);
+        return true;
+    }
 
-    private void updateDateLabel() {
-        String format = "yyyy-MM-dd";
-        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
-        dateEditText.setText(sdf.format(dateCalendar.getTime()));
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            this.finish();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.saveExcursion) {
+            saveExcursion();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.deleteExcursion) {
+            deleteExcursion();
+            return true;
+        }
+
+        if (item.getItemId() == R.id.setAlarmExcursion) {
+            setAlarm();  // Call the setAlarm method
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void saveExcursion() {
-        String title = titleEditText.getText().toString().trim();
-        String date = dateEditText.getText().toString().trim();
-
-        if (TextUtils.isEmpty(title) || TextUtils.isEmpty(date)) {
-            Toast.makeText(this, "Please enter a title and date", Toast.LENGTH_SHORT).show();
+        // Ensure the date is selected
+        if (excursionDate == null) {
+            Toast.makeText(ExcursionDetailActivity.this, "Date must be set before saving.", Toast.LENGTH_LONG).show();
             return;
         }
 
-        if (!isDateValid(date)) {
-            Toast.makeText(this, "Please enter a valid date in the format yyyy-MM-dd", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // If editing, keep the current excursionID; otherwise, let Room auto-generate the ID
+        Excursion excursion = new Excursion(excursionID == -1 ? 0 : excursionID, title, excursionDate, vacationID);
 
-        if (!isDateWithinVacation(date)) {
-            Toast.makeText(this, "Excursion date must be within the vacation period", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        // Insert or update based on the excursionID
+        if (excursionID == -1) {
+            // Insert a new excursion in a background thread
+            Repository.dbExecutor.execute(() -> {
+                try {
+                    Future<Long> futureExcursionID = repository.insert(excursion);  // Insert and get the generated ID
+                    long newExcursionID = futureExcursionID.get();  // This will block, but it's in a background thread
+                    excursionID = (int) newExcursionID;
 
-        if (currentExcursion == null) {
-            currentExcursion = new Excursion();
-            currentExcursion.setVacationId(vacationId);
-        }
-
-        currentExcursion.setTitle(title);
-        currentExcursion.setDate(date);
-
-        if (currentExcursion.getId() == 0) {
-            vacationViewModel.insertExcursion(currentExcursion);
+                    // Update the UI on the main thread
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Excursion added with ID: " + excursionID, Toast.LENGTH_SHORT).show();
+                        finish();  // Close the activity
+                    });
+                } catch (Exception e) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Error adding excursion: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+                    e.printStackTrace();
+                }
+            });
         } else {
-            vacationViewModel.updateExcursion(currentExcursion);
+            // Update the existing excursion in a background thread
+            Repository.dbExecutor.execute(() -> {
+                repository.update(excursion);
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Excursion updated with ID: " + excursionID, Toast.LENGTH_SHORT).show();
+                    finish();  // Close the activity
+                });
+            });
         }
-
-        setNotification(title, date);
-
-        finish();
     }
 
     private void deleteExcursion() {
-        if (currentExcursion != null) {
-            vacationViewModel.deleteExcursion(currentExcursion);
-        }
-        finish();
-    }
-
-    private boolean isDateValid(String date) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-            sdf.setLenient(false);
-            sdf.parse(date);
-            return true;
-        } catch (Exception e) {
-            return false;
+        if (excursionID != -1) {
+            repository.delete(new Excursion(excursionID, title, excursionDate, vacationID));
+            Toast.makeText(this, "Excursion deleted", Toast.LENGTH_SHORT).show();
+            finish();
+        } else {
+            Toast.makeText(this, "Excursion not saved yet", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private boolean isDateWithinVacation(String date) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-            return !sdf.parse(date).before(sdf.parse(vacationStartDate)) && !sdf.parse(date).after(sdf.parse(vacationEndDate));
-        } catch (Exception e) {
-            return false;
+    // Method to set an alarm for the excursion
+    private void setAlarm() {
+        if (excursionDate != null) {
+            Calendar excursionCalendar = Calendar.getInstance();
+            excursionCalendar.setTime(excursionDate);
+
+            // Call a utility function to set the alarm
+            AlarmUtil.setAlarm(this, excursionCalendar, true, title);  // Assuming true means it's a start alarm
+            Toast.makeText(this, "Alarm set for excursion: " + title, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Excursion date must be set before setting an alarm.", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void setNotification(String title, String date) {
-        Intent intent = new Intent(this, ExcursionNotificationReceiver.class);
-        intent.putExtra("excursion_title", title);
-        intent.putExtra("message", "Excursion: " + title + " is scheduled for today");
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Calendar calendar = Calendar.getInstance();
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-            calendar.setTime(sdf.parse(date));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
     }
 }
